@@ -1,0 +1,303 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Scanner;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
+public class kmeans {
+
+	static float[][] dataMatrix=new float[400][16];
+	static float[][] centroidMatrix=new float[5][16];
+	static HashMap<Integer,Integer> distanceMap=new HashMap<Integer,Integer>();
+	static HashMap<Integer,Integer> kmeansMap=new HashMap<Integer,Integer>();
+	static HashMap<Integer,Integer> fakedistanceMap=new HashMap<Integer,Integer>();
+	static int level=2;
+	static TreeSet<Float> sortDifference= new TreeSet<Float>();
+	static TreeSet<Float> sortCentroidDifference= new TreeSet<Float>();
+	static TreeSet<Integer> getClusters= new TreeSet<Integer>();
+	static TreeSet<Integer> getClustersCopy= new TreeSet<Integer>();
+	static HashMap<Integer,Float> bufferMap=new HashMap<Integer,Float>(); 
+	static float tempkeyval=0;
+
+	public static void main(String args[]) throws IOException{
+		Scanner userInput = new Scanner(System.in);
+		String file_name;
+		
+		//User Interface for Input
+		System.out.println("*********** IMPLEMENTATION OF HIERARCHICAL CLUSTERING ALGORITHM **********");
+		System.out.println("Enter the filename for data set: ");
+		file_name=userInput.next();
+		
+		//Getting data matrix and calculating distances between each
+		getData(file_name);
+//		for(int i=0;i<386;i++)
+//		{
+//			for(int j=0;j<16;j++)
+//			{
+//				System.out.print(dataMatrix[i][j]);
+//			}
+//			System.out.println();
+//		}
+		getCentroids(dataMatrix);
+		calculateDistances();
+		
+		//Check the minimum distances and print levels according to it
+	
+		
+		
+		
+		
+		//System.out.println( count);
+		
+		/*for(int i=0;i<386;i++){
+			for(int j=0;j<16;j++)
+			System.out.print(dataMatrix[i][j]+" ");		
+			System.out.println();
+		}*/
+		
+	}
+	
+	public static void getData(String fileName) throws IOException{
+
+		BufferedReader inFile = new BufferedReader(new FileReader(fileName));		
+		int line_counter=0;
+		String current_line;
+		while((current_line=inFile.readLine()) != null){			
+			StringTokenizer items = new StringTokenizer(current_line, "\t");	
+			items.nextToken();items.nextToken();
+            int column_count=0;
+			while(items.hasMoreTokens()){
+				String token=items.nextToken();
+				dataMatrix[line_counter][column_count]=Float.parseFloat(token);
+				column_count++;		
+			}
+			line_counter++;
+		}	
+	}
+	public static void getCentroids(float[][] dataMatrixBuffer)
+	{
+		System.out.println("Get Centroids");
+		for(int a=0;a<5;a++)
+		{
+			for (int b=0;b<16;b++)
+				{
+					centroidMatrix[a][b]=dataMatrixBuffer[a][b];
+				}
+		}
+		
+		
+	}
+	
+	public static void calculateDistances(){
+		System.out.println("Calculate distances");
+		for(int a=0;a<5;a++)
+		{
+			distanceMap.put(a,a);
+		}
+	
+		for(int i=5;i<386;i++)
+		{
+			sortCentroidDifference.clear();
+			bufferMap.clear();
+			for(int j=0;j<5;j++)
+			{
+				float value=0;
+				for(int k=0;k<16;k++)
+				{
+					value+=Math.abs(centroidMatrix[j][k]-dataMatrix[i][k]);
+				}
+				sortCentroidDifference.add(value);
+				bufferMap.put(j,value);
+			}
+			Iterator<Float> Buffer=sortCentroidDifference.iterator();
+			if(Buffer.hasNext())
+			 tempkeyval=Buffer.next();
+			for(Integer valuekey : bufferMap.keySet())
+			{
+				
+				if(bufferMap.get(valuekey)==tempkeyval)
+				{
+				distanceMap.put(i,valuekey);
+				break;
+				}
+				
+			}
+			
+
+		}
+		for (Integer key : distanceMap.keySet() ) {
+			
+			// Get the String value that goes with the key
+			int mapvalue = distanceMap.get( key );
+			System.out.println( key +"="+mapvalue);
+			
+		}
+		for(int i=0;i<5;i++)
+		{
+			for(int k=0;k<16;k++)
+			{
+				System.out.print(centroidMatrix[i][k]+" ");
+			}
+			System.out.println();
+		}
+		checkLevels();
+		
+	}
+	
+	public static void checkLevels(){
+		 float[][] clusterMatrix=new float[400][16];
+		 float[][] centroid=new float[5][16];
+		 float sum=0;
+		 
+		 
+		for(int i=0;i<5;i++)
+		{
+			
+			getClusters.clear();
+			for (Integer tempkey : distanceMap.keySet() ) 
+			{
+				if(distanceMap.get(tempkey)==i)
+				getClusters.add(tempkey);
+			
+			}
+			
+			Iterator<Integer> inCluster=getClusters.iterator();
+//			while(inCluster.hasNext())
+//			{
+//				System.out.println(inCluster.next()+"==="+i+"incluster");
+//			}
+			//getClustersCopy.addAll(getClusters);
+
+			/*
+			while(inClusterpart2.hasNext())
+			{
+				System.out.println("no 2---"+inClusterpart2.next()+"----"+i);
+			}*/
+			Iterator<Integer> inClusterpart2=getClusters.iterator();
+			/*for(int j=0;j<getClusters.size();j++)
+			{
+				//System.out.println("IN j");
+				for(int k=0;k<16;k++)
+				{
+				//System.out.println("IN K");
+					if(inClusterpart2.hasNext())
+					{
+						//System.out.println(j+"matrix"+inClusterpart2.next());
+					clusterMatrix[j][k]=dataMatrix[inClusterpart2.next()][k];
+					}
+				}
+			}*/
+		
+			//for(int j=0;j<getClusters.size();j++)
+			//{
+				//System.out.println("value of j"+j);
+			
+			int b=0;
+			
+			while(inClusterpart2.hasNext()){
+				
+				int entry=inClusterpart2.next();
+				
+				for(int k=0;k<16;k++)
+				{
+					clusterMatrix[b][k]=dataMatrix[entry][k];
+										
+				}
+				
+				b++;
+				
+			}
+			
+//			for(int a=0;a<getClusters.size();a++)
+//			{
+//				for(int j=0;j<16;j++)
+//				{
+//					System.out.print(clusterMatrix[a][j]);
+//				}
+//				System.out.println();
+//			}
+			
+				/*for(int k=0;k<16;k++)
+				{
+					if(inClusterpart2.hasNext())
+					{
+					System.out.print(dataMatrix[inClusterpart2.next()][k]);
+					}
+					
+				}
+				System.out.println();*/
+			//}
+			
+			for(int k=0;k<16;k++)
+			{
+				sum=0;				
+				for(int j=0;j<getClusters.size();j++)
+				{
+					sum+=clusterMatrix[j][k];
+				}
+				centroid[i][k]=(sum/getClusters.size());
+			}
+//			System.out.println("Row"+i);
+//			for(int k=0;k<16;k++)
+//			{
+//				
+//				System.out.print(centroid[i][k]);
+//			}
+			
+			
+	}
+		int flag=0;
+		for(int a=0;a<5;a++)
+		{
+			for(int b=0;b<16;b++)
+			{
+				if(centroid[a][b]==centroidMatrix[a][b])
+				{
+					
+					continue;
+				}
+					
+				else
+				{
+					centroidMatrix[a][b]=centroid[a][b];
+					flag=2;
+				}
+					
+			}
+		}
+		if(flag == 2)
+		{
+			calculateDistances();
+			//System.out.print("In if"+"value flag"+flag);
+		}
+			
+		else 
+		{
+			//System.out.println("End");
+			for(int i=0;i<5;i++)
+			{
+				for(int k=0;k<16;k++)
+				{
+					System.out.print(centroidMatrix[i][k]+" ");
+				}
+				System.out.println();
+			}
+			kmeansMap.putAll(distanceMap);
+			for(Integer a:kmeansMap.keySet())
+			{
+				int valuefinal=kmeansMap.get(a);
+				System.out.println(a+"==final=="+valuefinal);
+			}
+			System.exit(0);	
+			
+  
+	
+		}
+	}	
+
+}
